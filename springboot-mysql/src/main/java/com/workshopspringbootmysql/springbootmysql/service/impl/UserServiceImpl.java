@@ -1,5 +1,7 @@
 package com.workshopspringbootmysql.springbootmysql.service.impl;
 
+import com.workshopspringbootmysql.springbootmysql.dto.UserDto;
+import com.workshopspringbootmysql.springbootmysql.mapper.UserMapper;
 import com.workshopspringbootmysql.springbootmysql.model.User;
 import com.workshopspringbootmysql.springbootmysql.repository.UserRepository;
 import com.workshopspringbootmysql.springbootmysql.service.UserService;
@@ -10,48 +12,58 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
-    @Autowired
-    UserRepository userRepository;
+
+    private UserRepository userRepository;
 
     @Override
-    public User createUser(User user) {
-        return userRepository.save(user);
+    public UserDto createUser(UserDto userDto) {
+
+        // Convert UserDto into User JPA Entity
+        User user = UserMapper.mapToUser(userDto);
+
+        User savedUser = userRepository.save(user);
+
+        // Convert User JPA entity to UserDto
+        UserDto savedUserDto = UserMapper.mapToUserDto(savedUser);
+
+        return savedUserDto;
     }
 
     @Override
-    public User getUserById(Long userId) {
+    public UserDto getUserById(Long userId) {
         Optional<User> optionalUser = userRepository.findById(userId);
-        return optionalUser.get();
+        User user = optionalUser.get();
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDto> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(UserMapper::mapToUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public User updateUser(User user) throws UserIdMismatchException {
-
-        if (user.getId() ==null) {
-            throw new UserIdMismatchException();
-        }
-
+    public UserDto updateUser(UserDto user) {
         User existingUser = userRepository.findById(user.getId()).get();
         existingUser.setFirstName(user.getFirstName());
         existingUser.setLastName(user.getLastName());
         existingUser.setEmail(user.getEmail());
-
-        return userRepository.save(existingUser);
-
+        User updatedUser = userRepository.save(existingUser);
+        return UserMapper.mapToUserDto(updatedUser);
     }
+
     @Override
     public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }
 }
+
 
 
 //

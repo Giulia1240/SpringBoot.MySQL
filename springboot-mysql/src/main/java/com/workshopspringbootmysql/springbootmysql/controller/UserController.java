@@ -1,8 +1,7 @@
 package com.workshopspringbootmysql.springbootmysql.controller;
 
-import com.workshopspringbootmysql.springbootmysql.model.User;
+import com.workshopspringbootmysql.springbootmysql.dto.UserDto;
 import com.workshopspringbootmysql.springbootmysql.service.UserService;
-import com.workshopspringbootmysql.springbootmysql.service.exception.UserIdMismatchException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,34 +13,46 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping("api/users")
 public class UserController {
+
     private UserService userService;
+
+    // build create User REST API
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User savedUser = userService.createUser(user);
+    public ResponseEntity<UserDto> createUser(@RequestBody UserDto user){
+        UserDto savedUser = userService.createUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
+
+    // build get user by id REST API
+    // http://localhost:8080/api/users/1
     @GetMapping("{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") Long userId) {
-        User user = userService.getUserById(userId);
+    public ResponseEntity<UserDto> getUserById(@PathVariable("id") Long userId){
+        UserDto user = userService.getUserById(userId);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
+    // Build Get All Users REST API
+    // http://localhost:8080/api/users
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers(){
+        List<UserDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    // Build Update User REST API
     @PutMapping("{id}")
-    public ResponseEntity<User> updateUser(@PathVariable("id") Long userId, @RequestBody User user) throws UserIdMismatchException {
+    // http://localhost:8080/api/users/1
+    public ResponseEntity<UserDto> updateUser(@PathVariable("id") Long userId,
+                                              @RequestBody UserDto user){
         user.setId(userId);
-        User updatedUser = userService.updateUser(user);
+        UserDto updatedUser = userService.updateUser(user);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
+    // Build Delete User REST API
     @DeleteMapping("{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId) {
+    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId){
         userService.deleteUser(userId);
         return new ResponseEntity<>("User successfully deleted!", HttpStatus.OK);
     }
-
 }
